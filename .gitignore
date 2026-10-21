@@ -1,0 +1,33 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python build and cache artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+*.whl
+
+# Test and tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Never commit real exports or the reports made from them: both carry
+# student records. The fake sample under examples/ is the only data file
+# that belongs in history.
+*-report.html
+*-findings.csv
+/*.csv
+/*.txt
+/*.tsv
+exports/
+reports/
+
+# Editor
+.vscode/
+.idea/
+*.swp

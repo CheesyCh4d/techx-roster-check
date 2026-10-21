@@ -1,0 +1,265 @@
+# District data health: everyday data-quality checks for PowerSchool exports.
+#
+# This file is data, not code. Each [[rules]] block below is one check; add,
+# change, or delete blocks and the next check uses them. Nothing in Python
+# needs to change. The rule types and their settings are listed in README.md.
+#
+# Edit your own copy, not this one, so upgrades never overwrite your changes:
+#     techx-roster-check copy-pack health
+# then edit ~/.config/techx-roster-check/packs/health.toml
+#
+# A check whose columns are missing from the export is listed under
+# "Checks not run" instead of failing, so one pack can cover student exports
+# and contact exports alike.
+
+[pack]
+name = "District data health"
+description = "Everyday data-quality checks for a PowerSchool student or contact export."
+
+# How a row is named in the report. The first line whose columns are all in
+# the file is used; the row number is always shown as well.
+row_label = [
+    "{student_number} · {lastfirst}",
+    "{student_number} · {last_name}, {first_name}",
+    "{student_number}",
+]
+
+# How dates are written in your exports. PowerSchool usually uses MM/DD/YYYY.
+# Codes: %m month, %d day, %Y four-digit year.
+date_formats = ["%m/%d/%Y", "%Y-%m-%d"]
+
+
+# Every column the rules below use, and other ways its header may be spelled.
+# Matching ignores case, spaces, dashes and table prefixes, so
+# "Students.Student_Number", "[1]Student_Number" and "Student Number" all
+# match student_number without being listed.
+[columns]
+student_number = ["studentnumber", "stu_number", "student_no"]
+state_studentnumber = ["state_id", "state_student_number", "state_student_id", "aksid"]
+lastfirst = ["last_first", "student_name"]
+last_name = ["lastname", "last", "surname"]
+first_name = ["firstname", "first"]
+dob = ["birthdate", "birth_date", "date_of_birth"]
+gender = ["sex"]
+grade_level = ["grade", "gradelevel"]
+schoolid = ["school_id", "school_number", "schoolnumber"]
+enroll_status = ["enrollstatus", "enrollment_status"]
+entrydate = ["entry_date"]
+exitdate = ["exit_date"]
+home_phone = ["homephone", "phone"]
+guardianemail = ["guardian_email", "parent_email"]
+zip = ["mailing_zip", "zipcode", "zip_code", "postal_code"]
+counselor = ["counselor_name", "u_counselor", "guidance_counselor"]
+is_custodial = ["iscustodial", "custodial"]
+contact_email = ["email_address", "emailaddress"]
+
+
+# ---------------------------------------------------------------- identity
+
+[[rules]]
+id = "student-number-present"
+type = "present"
+column = "student_number"
+label = "Every row has a student number"
+fix = "Find the student by name in PowerSchool and add the number on the Demographics page."
+
+[[rules]]
+id = "student-number-unique"
+type = "unique"
+column = "student_number"
+label = "No two rows share a student number"
+fix = "Two records may be the same student entered twice. Compare them before merging or renumbering."
+
+[[rules]]
+id = "state-id-present"
+type = "present"
+column = "state_studentnumber"
+severity = "warning"
+label = "Every student has a state ID (AKSID)"
+fix = "Request an AKSID for new students through DEED's student ID system, then enter it in PowerSchool."
+
+[[rules]]
+id = "state-id-format"
+type = "format"
+column = "state_studentnumber"
+pattern = '\d{10}'
+expected = "a 10-digit number"
+label = "State ID (AKSID) is 10 digits"
+fix = "Re-enter the AKSID exactly as DEED issued it: 10 digits, no spaces or dashes."
+
+[[rules]]
+id = "state-id-unique"
+type = "unique"
+column = "state_studentnumber"
+label = "No two students share a state ID"
+fix = "One of these students has the wrong AKSID. Check both against DEED's ID system."
+
+[[rules]]
+id = "name-present"
+type = "present"
+columns = ["last_name", "first_name"]
+label = "First and last name are filled in"
+
+
+# ---------------------------------------------------------- birth and age
+
+[[rules]]
+id = "dob-present"
+type = "present"
+column = "dob"
+label = "Every student has a date of birth"
+
+[[rules]]
+id = "dob-valid"
+type = "date"
+column = "dob"
+not_before = 1990-01-01
+not_after = "today"
+label = "Date of birth is a real, past date"
+fix = "Check the birth certificate or enrollment paperwork and correct the date."
+
+[[rules]]
+id = "dob-age"
+type = "age"
+column = "dob"
+min = 3
+max = 21
+severity = "warning"
+label = "Date of birth gives an age of 3 to 21"
+fix = "A typo in the year is the usual cause. Students over 21 may be legitimate in special programs."
+
+[[rules]]
+id = "grade-age"
+type = "grade_age"
+grade = "grade_level"
+dob = "dob"
+tolerance = 1
+cutoff = "09-01"
+severity = "warning"
+label = "Grade roughly matches age"
+fix = "Retained or accelerated students are expected here. Anything else is likely a wrong grade or birthdate."
+
+
+# ---------------------------------------------------- enrollment and codes
+
+[[rules]]
+id = "grade-known"
+type = "allowed"
+column = "grade_level"
+# PowerSchool: -2 PK3, -1 PK4, 0 kindergarten, 1-12, 99 graduated.
+values = [-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 99]
+label = "Grade level is a known PowerSchool grade"
+
+[[rules]]
+id = "active-not-graduated"
+type = "forbidden"
+column = "grade_level"
+values = [99]
+when = { column = "enroll_status", in = ["0"] }
+label = "Active students are not in grade 99"
+fix = "A graduated student still shows as active. Run the graduation exit, or correct the grade."
+
+[[rules]]
+id = "enroll-status-known"
+type = "allowed"
+column = "enroll_status"
+# -2 inactive, -1 pre-registered, 0 active, 1 inactive, 2 transferred out,
+# 3 graduated, 4 imported as historical.
+values = [-2, -1, 0, 1, 2, 3, 4]
+label = "Enrollment status is a known PowerSchool code"
+
+[[rules]]
+id = "gender-known"
+type = "allowed"
+column = "gender"
+# X is included because PowerSchool's gender codes are configurable.
+# Remove it if your district does not use it.
+values = ["M", "F", "X"]
+label = "Gender is M, F or X"
+
+[[rules]]
+id = "school-known"
+type = "reference"
+column = "schoolid"
+file = "health-schools.csv"
+file_column = "school_number"
+label = "School number is one of the district's schools"
+fix = "Correct the school, or add a new school's number to health-schools.csv."
+
+[[rules]]
+id = "entry-date-valid"
+type = "date"
+columns = ["entrydate", "exitdate"]
+not_before = 2000-01-01
+label = "Entry and exit dates are real dates"
+
+[[rules]]
+id = "exit-after-entry"
+type = "compare"
+left = "exitdate"
+op = ">="
+right = "entrydate"
+kind = "date"
+label = "Exit date is not before entry date"
+fix = "Usually a typo in one of the two dates."
+
+
+# --------------------------------------------------------------- contact
+
+[[rules]]
+id = "phone-format"
+type = "format"
+column = "home_phone"
+pattern = '\(?\d{3}\)?[-. ]?\d{3}[-. ]?\d{4}'
+expected = "a 10-digit phone number like 907-555-0123"
+severity = "warning"
+label = "Home phone is a full phone number"
+
+[[rules]]
+id = "guardian-email-format"
+type = "format"
+column = "guardianemail"
+# GuardianEmail can hold several addresses separated by commas; each is checked.
+split = ",;"
+pattern = '[^@\s]+@[^@\s]+\.[A-Za-z]{2,}'
+expected = "a valid email address"
+label = "Guardian email addresses look valid"
+fix = "Correct the address; parent notifications sent to it will bounce."
+
+# A rule runs only when the file has every column it names, so the contact
+# version of this check is its own rule: it runs on contact exports and is
+# listed under "Checks not run" on student exports.
+[[rules]]
+id = "contact-email-format"
+type = "format"
+column = "contact_email"
+pattern = '[^@\s]+@[^@\s]+\.[A-Za-z]{2,}'
+expected = "a valid email address"
+label = "Contact email addresses look valid"
+fix = "Correct the address on the contact's record."
+
+[[rules]]
+id = "zip-format"
+type = "format"
+column = "zip"
+pattern = '\d{5}(-\d{4})?'
+expected = "a ZIP code like 99501 or 99501-1234"
+severity = "warning"
+label = "ZIP code is 5 or 9 digits"
+
+[[rules]]
+id = "senior-counselor"
+type = "present"
+column = "counselor"
+when = { column = "grade_level", in = ["12"] }
+severity = "warning"
+label = "Seniors have a counselor assigned"
+fix = "Assign a counselor before transcript and graduation work begins."
+
+[[rules]]
+id = "custodial-contact-email"
+type = "present"
+column = "contact_email"
+when = { column = "is_custodial", in = ["1", "y", "yes", "true", "t"] }
+label = "Custodial contacts have an email address"
+fix = "Ask the family for an email, or record that they have none so this can be excused."

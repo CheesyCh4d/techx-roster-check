@@ -1,0 +1,10 @@
+# The district's school numbers (PowerSchool Schools.School_Number), used by
+# the "school-known" check in health.toml. One school per line, below the
+# header. Lines starting with # are ignored.
+#
+# THESE ARE EXAMPLES. Replace them with your real schools in your own copy:
+#     techx-roster-check copy-pack health
+school_number,school_name
+100,Example Elementary
+200,Example Middle
+300,Example High

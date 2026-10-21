@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "techx-roster-check"
+version = "0.1.0"
+description = "Local tool that checks PowerSchool exports against rule packs and reports every row that fails"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "CheesyCh4d" }]
+license = "MIT"
+license-files = ["LICENSE"]
+
+# The checking engine uses only the standard library. These two run the
+# local web page; the command line `check` works without starting them.
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "httpx>=0.27"]
+
+[project.scripts]
+techx-roster-check = "techx_roster_check.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["techx_roster_check"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,199 @@
+/* TechX Roster Check: the same utilitarian palette as the other TechX tools.
+   This sheet is inlined into every page, so a saved report looks the same
+   opened from disk with no server running. */
+
+:root {
+  --bg: oklch(0.955 0.004 240);
+  --header-bg: oklch(0.97 0.003 240);
+  --thead-bg: oklch(0.965 0.004 240);
+  --panel: #fff;
+  --border: #c9d0d6;
+  --border-soft: #e3e8ec;
+  --rowsep: #eceff2;
+  --btn-border: #b6bfc7;
+  --text: #232a31;
+  --text-strong: #16202b;
+  --text-2: #5b6771;
+  --text-3: #7c8791;
+
+  --accent: oklch(0.55 0.13 160);
+  --accent-line: oklch(0.45 0.12 160);
+  --accent-grad-a: oklch(0.58 0.13 160);
+  --accent-grad-b: oklch(0.51 0.13 160);
+
+  --ok-fg: oklch(0.4 0.12 155);
+  --ok-bg: oklch(0.96 0.03 155);
+  --ok-line: oklch(0.85 0.06 155);
+  --error-fg: oklch(0.45 0.17 25);
+  --error-bg: oklch(0.96 0.025 25);
+  --error-line: oklch(0.85 0.06 25);
+  --warn-fg: oklch(0.48 0.11 75);
+  --warn-bg: oklch(0.97 0.035 85);
+  --warn-line: oklch(0.86 0.07 85);
+
+  --mono: "Source Code Pro", "Noto Sans Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+  --sans: "Source Sans 3", "Noto Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 var(--sans);
+}
+a { color: var(--accent-line); }
+h1, h2, h3 { color: var(--text-strong); margin: 0; }
+h1 { font-size: 20px; }
+h2 { font-size: 16px; }
+h3 { font-size: 14px; }
+.mono, .value { font-family: var(--mono); font-size: 12.5px; }
+.muted { color: var(--text-2); }
+.blank { color: var(--text-3); font-style: italic; font-family: var(--sans); }
+
+/* ------------------------------------------------------------ top bar */
+.topbar {
+  display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap;
+  padding: 10px 16px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+}
+.brand { font-weight: 700; font-size: 15px; color: var(--text-strong); }
+.meta { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); }
+.spacer { flex: 1; }
+.btn {
+  display: inline-block;
+  font: inherit; font-weight: 600; font-size: 13px;
+  padding: 5px 12px; border-radius: 3px;
+  border: 1px solid var(--btn-border); background: #fff; color: var(--text);
+  cursor: pointer; text-decoration: none;
+}
+.btn:hover { background: var(--header-bg); }
+.btn.primary {
+  background: linear-gradient(var(--accent-grad-a), var(--accent-grad-b));
+  border-color: var(--accent-line); color: #fff;
+}
+.btn.primary:disabled { opacity: 0.6; cursor: progress; }
+
+main { max-width: 1120px; margin: 0 auto; padding: 16px; }
+main.narrow { max-width: 640px; }
+
+/* ------------------------------------------------------------- counts */
+.tiles {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+.tile {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+  padding: 10px 14px;
+}
+.tile .num {
+  font-size: 28px; font-weight: 700; line-height: 1.1;
+  color: var(--text-strong); font-variant-numeric: tabular-nums;
+}
+.tile .cap { font-size: 12.5px; color: var(--text-2); }
+.tile.error .num { color: var(--error-fg); }
+.tile.warning .num { color: var(--warn-fg); }
+
+.banner { margin: 12px 0; padding: 10px 14px; border-radius: 4px; border: 1px solid; }
+.banner.ok { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok-fg); font-weight: 600; }
+.banner.note { background: var(--warn-bg); border-color: var(--warn-line); }
+.banner.problem { background: var(--error-bg); border-color: var(--error-line); color: var(--error-fg); }
+.banner p { margin: 0; }
+.banner p + p { margin-top: 6px; }
+
+/* ------------------------------------------------------------- panels */
+.panel {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+  margin: 14px 0; overflow: hidden;
+}
+.panel.pad { padding: 18px 20px; }
+.panel-head {
+  display: flex; align-items: baseline; gap: 8px 14px; flex-wrap: wrap;
+  padding: 10px 14px; border-bottom: 1px solid var(--border-soft);
+}
+.panel-head .count { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
+.panel-sub { padding: 8px 14px; font-size: 13px; color: var(--text-2); border-bottom: 1px solid var(--border-soft); }
+.panel-sub strong { color: var(--text); }
+.scroll { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; font-weight: 600; color: var(--text-2);
+  background: var(--thead-bg);
+  padding: 6px 12px; border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td { padding: 6px 12px; border-bottom: 1px solid var(--rowsep); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+/* Finding tables share column widths so every check lines up the same way.
+   Below 720px they keep a minimum width and scroll sideways instead. */
+table.fixed { table-layout: fixed; min-width: 640px; }
+table.fixed td { overflow-wrap: anywhere; }
+col.c-row { width: 64px; }
+col.c-sev { width: 96px; }
+col.c-student { width: 26%; }
+col.c-check { width: 30%; }
+col.c-value { width: 22%; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.rowno { font-family: var(--mono); font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.more { padding: 8px 14px; font-size: 13px; color: var(--text-2); background: var(--thead-bg); }
+
+.sev { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.sev::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.sev.error { color: var(--error-fg); }
+.sev.warning { color: var(--warn-fg); }
+
+/* ---------------------------------------------- by check / by student */
+.tab-radio { position: absolute; opacity: 0; pointer-events: none; }
+.tabs { display: flex; gap: 6px; margin: 18px 0 0; }
+.tabs label {
+  padding: 6px 14px; border: 1px solid var(--btn-border); border-radius: 3px;
+  background: #fff; font-weight: 600; font-size: 13px; cursor: pointer;
+}
+#view-check:checked ~ .tabs label[for="view-check"],
+#view-student:checked ~ .tabs label[for="view-student"] {
+  background: var(--accent); border-color: var(--accent-line); color: #fff;
+}
+#view-check:focus-visible ~ .tabs label[for="view-check"],
+#view-student:focus-visible ~ .tabs label[for="view-student"] { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+.view { display: none; }
+#view-check:checked ~ .view-check,
+#view-student:checked ~ .view-student { display: block; }
+
+details.panel > summary {
+  padding: 10px 14px; cursor: pointer; font-weight: 600; color: var(--text-strong);
+}
+details.panel[open] > summary { border-bottom: 1px solid var(--border-soft); }
+.list { margin: 0; padding: 10px 14px 12px 32px; }
+.list li { margin: 3px 0; }
+
+footer { margin: 24px 0 8px; font-size: 12.5px; color: var(--text-2); }
+
+/* -------------------------------------------------------- upload form */
+.intro { margin: 8px 0 18px; color: var(--text-2); }
+.drop {
+  position: relative; display: block;
+  border: 2px dashed var(--btn-border); border-radius: 6px;
+  padding: 28px 16px; text-align: center; background: var(--header-bg);
+  color: var(--text-2); font-weight: 600;
+}
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--ok-bg); }
+.drop.chosen { border-style: solid; border-color: var(--accent); color: var(--text-strong); }
+.drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.field { display: block; margin: 16px 0 6px; font-weight: 600; }
+.field-select {
+  display: block; width: 100%;
+  font: inherit; padding: 6px 8px; color: var(--text);
+  border: 1px solid var(--btn-border); border-radius: 3px; background: #fff;
+}
+.pack-desc { margin: 4px 0 16px; font-size: 13px; color: var(--text-2); min-height: 1.4em; }
+.msg { margin: 12px 0 0; min-height: 1.4em; }
+.msg.error { color: var(--error-fg); font-weight: 600; }
+
+@media print {
+  body { background: #fff; }
+  .topbar .btn, .tabs, .no-print { display: none !important; }
+  .panel { break-inside: auto; }
+  tr { break-inside: avoid; }
+}

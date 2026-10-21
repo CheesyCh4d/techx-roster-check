@@ -7,9 +7,9 @@ A rule pack is a TOML file with three parts:
     [[rules]]     one block per check (the types are described in rules.py)
 
 Packs that ship with the tool live in the `packs` folder inside the package.
-Your own editable copies live in ~/.config/techx-roster-check/packs/ and win
-over a built-in pack with the same file name, so upgrading the tool never
-overwrites your changes.
+Your own editable copies live in your config folder (see `user_pack_dir`)
+and win over a built-in pack with the same file name, so upgrading the tool
+never overwrites your changes.
 """
 
 from __future__ import annotations
@@ -28,7 +28,12 @@ DEFAULT_DATE_FORMATS = ["%m/%d/%Y", "%Y-%m-%d"]
 
 
 def user_pack_dir() -> Path:
-    base = os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config"
+    """Linux: ~/.config/techx-roster-check/packs
+    Windows: %APPDATA%\\techx-roster-check\\packs"""
+    if os.name == "nt":
+        base = os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming"
+    else:
+        base = os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config"
     return Path(base) / "techx-roster-check" / "packs"
 
 

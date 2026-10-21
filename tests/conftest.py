@@ -1,7 +1,8 @@
 """Test fixtures.
 
-XDG_CONFIG_HOME is pointed at a temporary folder before the package is
-imported, so the suite never sees (or writes) the real user's packs.
+The config folder (XDG_CONFIG_HOME on Linux, APPDATA on Windows) is pointed
+at a temporary folder before the package is imported, so the suite never
+sees (or writes) the real user's packs.
 """
 
 from __future__ import annotations
@@ -12,7 +13,8 @@ from datetime import date
 from pathlib import Path
 
 _TMP = Path(tempfile.mkdtemp(prefix="techx-roster-check-tests-"))
-os.environ["XDG_CONFIG_HOME"] = str(_TMP / "config")
+os.environ["XDG_CONFIG_HOME"] = str(_TMP / "config")   # Linux
+os.environ["APPDATA"] = str(_TMP / "config")           # Windows
 
 import pytest  # noqa: E402
 

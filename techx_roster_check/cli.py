@@ -39,10 +39,18 @@ LOOPBACK_ONLY = (
 
 
 def write_private(path: Path, data: bytes) -> None:
-    """Write a file only this user can read (0600): reports hold student data."""
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    """Write a file only this user can read: reports hold student data.
+
+    On Linux that is permission 0600. Windows has no such permission bits;
+    there the file takes the access rules of its folder, and a folder under
+    C:\\Users\\<you> is already private to you.
+    """
+    # O_BINARY stops Windows turning each "\n" into "\r\n" as it writes.
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_BINARY", 0)
+    fd = os.open(path, flags, 0o600)
     with os.fdopen(fd, "wb") as handle:
-        os.fchmod(handle.fileno(), 0o600)    # in case the file already existed
+        if os.name != "nt":
+            os.fchmod(handle.fileno(), 0o600)    # in case the file already existed
         handle.write(data)
 
 

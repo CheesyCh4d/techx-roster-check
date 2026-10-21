@@ -20,7 +20,8 @@ students.txt (from Data Export Manager)
 | | |
 |---|---|
 | Python | 3.12 or newer |
-| `pipx` | Kubuntu: `sudo apt install pipx` · Arch: `sudo pacman -S python-pipx` |
+| `pipx` | Kubuntu: `sudo apt install pipx` · Arch: `sudo pacman -S python-pipx` · Windows: `py -m pip install --user pipx` then `py -m pipx ensurepath` |
+| `git` | Windows: Git for Windows |
 
 ## Install
 
@@ -28,6 +29,10 @@ students.txt (from Data Export Manager)
 git clone https://github.com/CheesyCh4d/techx-roster-check
 pipx install ./techx-roster-check
 ```
+
+`git clone` creates the folder inside whatever folder the terminal is in.
+On Windows, use a normal (not administrator) terminal: an administrator one
+starts in `C:\Windows\System32`.
 
 ## Use it
 
@@ -47,8 +52,9 @@ buttons; a saved report works offline with nothing running.
 techx-roster-check check students.txt
 ```
 
-Writes `students-report.html` and `students-findings.csv` next to the export,
-readable only by you (`0600`). Exit code: `0` no errors, `1` errors found,
+Writes `students-report.html` and `students-findings.csv` next to the export.
+On Linux they are readable only by you (`0600`); on Windows they take the
+folder's access rules, so keep exports under your own user folder. Exit code: `0` no errors, `1` errors found,
 `2` the file or pack could not be used. Warnings alone exit `0`.
 
 Try both on the fake sample: `examples/students-sample.txt`.
@@ -65,8 +71,8 @@ techx-roster-check copy-pack health
 techx-roster-check packs        # shows which copy is in use, and where
 ```
 
-Your copy lives in `~/.config/techx-roster-check/packs/` and replaces the
-built-in one. **Put your real school numbers in `health-schools.csv` there**;
+Your copy lives in `~/.config/techx-roster-check/packs/` (Windows:
+`%APPDATA%\techx-roster-check\packs\`) and replaces the built-in one. **Put your real school numbers in `health-schools.csv` there**;
 the shipped list is examples. Packs are re-read on every check, so edits take
 effect without restarting.
 
@@ -138,7 +144,7 @@ Mistakes in a pack are reported by rule id ("Rule "dob-age" has settings an
 - Responses are `Cache-Control: no-store`. Request logging is off.
 - The server refuses non-loopback addresses, requests whose `Host` is not
   this machine (DNS rebinding), and cross-site `POST`s.
-- Reports contain student data. The command line writes them `0600`.
+- Reports contain student data. The command line writes them `0600` on Linux.
 
 ## Project layout
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import stat
 
@@ -18,9 +19,18 @@ def test_check_writes_private_report_and_csv(tmp_path, capsys):
     for name in ("students-report.html", "students-findings.csv"):
         path = tmp_path / name
         assert path.is_file()
-        assert stat.S_IMODE(path.stat().st_mode) == 0o600
+        if os.name != "nt":                                  # Windows has no 0600
+            assert stat.S_IMODE(path.stat().st_mode) == 0o600
     out = capsys.readouterr().out
     assert "15 errors, 6 warnings on 20 rows" in out
+
+
+def test_csv_line_endings_are_not_doubled(tmp_path):
+    export = tmp_path / "s.txt"
+    shutil.copyfile(SAMPLE, export)
+    main(["check", str(export), "--today", "2026-10-21"])
+    data = (tmp_path / "s-findings.csv").read_bytes()
+    assert b"\r\r\n" not in data and data.count(b"\r\n") == 22
 
 
 def test_clean_file_exits_zero(tmp_path):
